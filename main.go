@@ -5,12 +5,15 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5/middleware"
 )
+
 
 func main(){
 	fmt.Println("Hello World !!")
 
 	router := chi.NewRouter()
+	router.Use(middleware.Logger)
 
 	router.Get("/hello", myHandler);
 

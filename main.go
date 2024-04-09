@@ -1,33 +1,22 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"net/http"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/Abhishek-Jain-1925/Go-Micro-Services/application"
 )
 
 
 func main(){
-	fmt.Println("Hello World !!")
+	fmt.Println("*** Welcome to Microservices in GO ***")
 
-	router := chi.NewRouter()
-	router.Use(middleware.Logger)
+	app := application.New()
 
-	router.Get("/hello", myHandler);
-
-	server := &http.Server{
-		Addr: ":1925",
-		Handler: router,
-	}
-	fmt.Println("Server Running on Port 1925...")
-	err := server.ListenAndServe()
+	fmt.Println("Server Running...")
+	
+	err := app.Start(context.Background())
 	if err != nil{
-		fmt.Println("error while Running Server !")
+		fmt.Println("Something went wrong !! Due to : ",err)
 	}
-}
-
-func myHandler(w http.ResponseWriter, r * http.Request){
-	w.Write([]byte("Hello, World !"))
 }

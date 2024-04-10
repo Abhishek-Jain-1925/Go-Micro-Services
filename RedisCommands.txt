@@ -1,0 +1,2 @@
+to Start - sudo systemctl start redis
+to Stop - sudo service redis-server stop

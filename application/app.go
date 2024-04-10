@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -28,10 +29,35 @@ func (a *App) Start(ctx context.Context) error{
 	}
 
 	err := a.rdb.Ping(ctx).Err()
-
-	err = server.ListenAndServe()
-	if err!=nil{
-		return fmt.Errorf("failed to start the server: %w",err) 
+	if err != nil{
+		return fmt.Errorf("failed to connect to redis DB : %w",err)
 	}
-	return nil
+	fmt.Println("Connected to DB...")
+
+	defer func(){
+		if err := a.rdb.Close(); err !=nil{
+			fmt.Println("Error while closing DB")
+		}
+	}()
+
+	fmt.Println("Server Running...")
+	ch := make(chan error, 1)
+
+	go func(){
+		err = server.ListenAndServe()
+		if err!=nil{
+			ch <- fmt.Errorf("failed to start the server: %w",err) 
+		}
+		close(ch)
+	}()
+
+	select{
+	case err = <-ch:
+		return err
+	case <-ctx.Done():
+		timeout, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+
+		return server.Shutdown(timeout)
+	}
 }
